@@ -1,0 +1,20 @@
+// Duplicated from: https://www.youtube.com/watch?v=bU57q5R5eTc
+// This is an example scenario for identifying what operations will run on the 
+// driver vs on the executors. 
+
+val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM")
+
+def getEventCountOnWeekdaysPerMonth(data:RDD[(LocalDateTime, Long)]):Array[(String,Long)]={
+	val results = data
+		.filter(e=>e._1.getDayOfWeek.getValue<DayOfWeek.SATURDAY.getValue)
+		.map(mapDateTime2Date)
+		.reduceByKey(_+_)
+		.collect()
+		
+		results
+			.map(e=>(e._1.format(formatter),e._2))
+}
+
+private def mapDateTime2Date(v: (LocalDateTime, Long)): (LocalDate, Long)={
+	(v._1.toLocalDate.withDayOfMonth(1),v._2)
+}
